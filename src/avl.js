@@ -20,35 +20,76 @@ class BST{
 		this.right = null;
 		this.height = 1;
 	}
+}
 
-	insert(value){
-		if(value < this.value){
-			if(this.left == null){
-				this.left = new BST(value)
-				
+
+function insert(value, node){
+		if(value < node.value){
+			if(node.left == null){
+				node.left = new BST(value)
 			}else{
-				this.left.insert(value)
+				insert(value, node.left)
 			}
 		}else{
-			if(this.right == null){
-				this.right = new BST(value)
+			if(node.right == null){
+				node.right = new BST(value)
 			}else{
-				this.right.insert(value)
+				insert(value, node.right)
 			}
 		}
-		this.height = 1 + Math.max(this.height_cal(this.left), this.height_cal(this.right));
-		return this
+	node.height = Math.max(height_cal(node.left), height_cal(node.right)) + 1;
+	let balance  = getBalance(node);
+	console.log(balance)
+	if(balance > 1 && node.left.value > value){
+		return rightRoate(node)
 	}
 
-	height_cal(demo){
+	if(balance < -1 && node.right.value < value){
+		return leftRoatye(node)
+	}
+	return node;
+}
+
+function height_cal(demo){
 		if(demo == null) return 0;
 		return demo.height;
 	}
 
+function getBalance(demo){
+		if(demo == null) return 0;
+		return (height_cal(demo.left) - height_cal(demo.right))
 }
 
-let demo;
+function leftRoatye(demo){
 
+	let x = demo.right;
+	let T1  =x.left;
+
+	x.left = demo;
+	demo.right = T1;
+
+	demo.height = Math.max(height_cal(demo.left), height_cal(demo.right))
+	x.height = Math.max(height_cal(x.left), height_cal(x.right))
+
+	return x;
+}
+ function rightRoate(demo){
+		let x = demo.left;
+		let T2 = x.right;
+
+		x.right = demo;
+		demo.left = T2;
+
+		demo.height = Math.max(height_cal(demo.left), height_cal(demo.right)) + 1;
+		x.height = Math.max(height_cal(x.left), height_cal(x.right)) + 1;
+		console.log(x)
+		return x;
+}
+
+
+let demo;
+//9824780745
+//dinesh mod
 
 let root = true;
 
@@ -60,8 +101,7 @@ function enterNumber() {
 		demo = new BST(value)
 		root = false;
 	}else{
-		demo.insert(value)
+		insert(value, demo)
 	}
-	
 	console.log(demo)
 }
