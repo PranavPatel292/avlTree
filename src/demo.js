@@ -12,6 +12,8 @@ let depth = 0;
 let current_x, current_y, minX, maxX, parentX, parentY;
 let reset_nodes = [];
 let flag = true;
+let flag_1 = true;
+let noDraw = false;
 
 class BST{
 	constructor(value, x, y, minWidth, maxWidth){
@@ -31,10 +33,8 @@ class AVL{
 		if(node == null){
 			return new BST(value, x, y, minWidth, maxWidth)
 		}else if(value < node.value){
-
 			current_x = node.x;
 			current_y = node.y;
-
 			node.left = this.insert(value, node.left, 0, 0, 0, 0)
 
 			//this is copied from my bst.js
@@ -47,12 +47,11 @@ class AVL{
 					parentY = current_y
 					current_x = node.left.x;
 					current_y = node.left.y;
-					console.log(current_x, current_y)
 					flag = false;
 				}
-				
+		
 
-		}else{
+		}else if(value > node.value){
 			current_x = node.x
 			current_y = node.y;
 			node.right = this.insert(value, node.right, x, y, minWidth, maxWidth)
@@ -74,28 +73,121 @@ class AVL{
 		let balance = this.get_balance(node)
 		
 		//left-left
-		// if(balance > 1 && value < node.left.value){
-		// 	return this.rightBalance(node);
-		// }
+		let pX, pY, pMax, pMin;
 
-		// //left-right
-		// if(balance > 1 && value > node.left.value){
-		// 	node.left = this.leftBalance(node.left)
-		// 	return this.rightBalance(node);
-		// }
+		if(balance > 1 && value < node.left.value){
+			document.getElementById("operation").innerHTML = "LEFT LEFT INSERT"
+			pX = node.x;
+			pY = node.y;
+			pMax = node.maxWidth;
+			pMin = node.minWidth;
+			
+			let v = this.rightBalance(node);
+			v.x  = pX;
+			v.y = pY;
+			v.minWidth = pMin;
+			v.maxWidth = pMax;
+			//draw_circle(v.x, v.y, v.value, 0, 0)
+			let tempTree = new AVL();
 
-		// //right-right
-		// if(balance < -1 && node.right.value < value){
-		// return this.leftBalance(node);
-		// }
+			let temp = null;
+			temp = new BST(v.value, v.x, v.y, v.minWidth, v.maxWidth);
+			this.travel_preOrder(v, temp)
+			//this.update_and_replace(v.value, temp, pX, pY, pMax, pMin)
+			//set the left and right node value here!
+			noDraw = true
+			
+			//this.travel_preOrder_draw(temp, 0, 0)
+			return temp;
 
-		// //right-left
-		// if(balance < -1 && node.right.value > value){
-		// 	node.right = this.rightBalance(node.right);
-		// 	return this.rightBalance(node);
-		// }
+		} 
+		if(balance < -1 && value > node.right.value){
+			document.getElementById("operation").innerHTML = "RIGHT RIGHT INSERT"
+			pX = node.x;
+			pY = node.y;
+			pMax = node.maxWidth;
+			pMin = node.minWidth;
 
+			let v = this.leftBalance(node);
+			v.x = pX;
+			v.y = pY;
+			v.minWidth = pMin;
+			v.maxWidth = pMax;
+
+			let tempTree = new AVL();
+			let temp = null;
+			temp = new BST(v.value, v.x, v.y, v.minWidth, v.maxWidth);
+			this.travel_preOrder(v, temp);
+
+			noDraw = true;
+			return temp;
+		}
+		//left right insertion
+
+		if(balance > 1 && value > node.left.value){
+			document.getElementById("operation").innerHTML = "LEFT RIGHT INSERT"
+			pX = node.x;
+			pY = node.y;
+			pMax = node.maxWidth;
+			pMin = node.minWidth;
+			node.left = this.leftBalance(node.left)
+			let v = this.rightBalance(node);
+			v.x = pX;
+			v.y = pY;
+			v.minWidth = pMin;
+			v.maxWidth = pMax;
+			let tempTree = new AVL();
+			let temp = null;
+			temp =  new BST(v.value, v.x, v.y, v.minWidth, v.maxWidth)
+			this.travel_preOrder(v, temp);
+			noDraw = true;
+			return temp;
+		}
+
+		//right left insertion
+		if(balance < -1 && value < node.right.value){
+			document.getElementById("operation").innerHTML = "RIGHT LEFT INSERT";
+			pX = node.x;
+			pY = node.y;
+			pMax = node.maxWidth;
+			pMin = node.minWidth;
+			node.right = this.rightBalance(node.right)
+			let v = this.leftBalance(node);
+			v.x = pX;
+			v.y = pY;
+			v.minWidth = pMin;
+			v.maxWidth = pMax;
+			let tempTree = new AVL();
+			let temp = null;
+			temp =  new BST(v.value, v.x, v.y, v.minWidth, v.maxWidth)
+			this.travel_preOrder(v, temp);
+			noDraw = true;
+			return temp;
+		}
 	return node;
+	}
+
+	travel_preOrder(n, node){
+		if(n == null) return
+		//console.log(n.value)
+		// flag_1 = true;
+		// node = this.update_and_replace(n.value, node, 0, 0, 0, 0);
+		// //draw_circle(n.x, n.y, n.value, 0, 0)
+		node = this.update_and_replace(n.value, node, 0, 0, 0, 0)
+		flag_1 = true
+		//draw_circle(v.x, v.y, v.value, 0, 0)
+		// draw_circle(n.x, n.y, n.value, 0, 0)
+		this.travel_preOrder(n.left, node)
+		this.travel_preOrder(n.right, node)
+		// return node;
+	}
+
+	travel_preOrder_draw(node, pX, pY){
+		if(node == null) return ;
+		draw(node.x, node.y, node.value, pX, pY)
+		//console.log(node.value, node.x, node.y)
+		this.travel_preOrder_draw(node.left, node.x, node.y);
+		this.travel_preOrder_draw(node.right, node.x, node.y)
 	}
 
 	rightBalance(n){
@@ -104,10 +196,7 @@ class AVL{
 
 		x.right = n;
 		n.left = T2;
-
-		n.height = Math.max(this.cal_hight(n.left), this.cal_hight(n.right)) + 1;
-		x.height = Math.max(this.cal_hight(x.left), this.cal_hight(x.right)) + 1;
-		
+		console.log("X => ", x)
 		return x;
 	}
 
@@ -124,15 +213,55 @@ class AVL{
 	leftBalance(n){
 		let x = n.right;
 		let T1  =x.left;
+		let temp_x = n.x;
+		let temp_y = n.y;
+
 
 		x.left = n;
 		n.right = T1;
 
 		n.height = Math.max(this.cal_hight(n.left), this.cal_hight(n.right))
 		x.height = Math.max(this.cal_hight(x.left), this.cal_hight(x.right))
-
+		console.log("X=>", x)
 		return x;
 	}
+
+	update_and_replace(value, node, x, y, minWidth, maxWidth){
+		if(node == null){
+			return new BST(value, x, y, minWidth, maxWidth)
+		}
+		if(value < node.value){
+			current_x = node.x;
+			current_y = node.y;
+			node.left = this.update_and_replace(value, node.left)
+
+			//this is copied from my bst.js
+				if(flag_1){
+					node.left.minWidth = node.minWidth;
+					node.left.maxWidth = node.x;
+					node.left.x = node.left.minWidth + Math.floor(node.left.maxWidth - node.left.minWidth) / 2;
+					node.left.y = current_y + distance_y
+					flag_1 = false;
+				}
+		
+
+		}else if(value > node.value){
+			current_x = node.x
+			current_y = node.y;
+			node.right = this.update_and_replace(value, node.right)
+
+			if(flag_1){
+				node.right.minWidth = node.x;
+				node.right.maxWidth = node.maxWidth;
+				node.right.x = Math.floor(node.right.maxWidth + node.right.minWidth) / 2;
+				node.right.y = current_y + distance_y;
+				flag_1 = false
+			}
+
+		}
+		return node;
+	}
+	
 }
 
 
@@ -143,36 +272,70 @@ function enterNumber() {
 	let value = parseInt(document.getElementById("number").value);
 	if(nodes == null){
 		nodes = tree.insert(value, nodes, root_x, root_y, 0, canvas_width)
-		draw_circle(root_x, root_y, value, 0, 0)
+		//draw_circle(root_x, root_y, value, 0, 0, false)
 	}else{
 		nodes = tree.insert(value, nodes, current_x, current_y)
 		flag = true;
-		console.log(current_x, current_y)
-		draw_circle(current_x, current_y, value, parentX, parentY)
+		//draw_circle(current_x, current_y, value, parentX, parentY)
+
 	}
 	console.log(nodes)
+	ctx.clearRect(0, 0, canvas_width, canvas_height)
+			tree.travel_preOrder_draw(nodes, 0, 0)
+}
+
+function draw(x, y, value, pX, pY){
+		
+		ctx.beginPath()
+		ctx.lineWidth = 5;
+		ctx.arc(x, y, 20, 0, 2 * Math.PI, true)
+		ctx.fillStyle = "white";
+		ctx.fill();
+		ctx.stroke()
+		//this is for the text inside the circle
+		ctx.beginPath()
+		ctx.font = "15px Arial"
+		ctx.fillStyle = "black";
+		ctx.fill();
+		ctx.textAlign = "center";
+		ctx.fillText(value, x, y + 5)
+		ctx.stroke();
+
+		if(pX == 0 && pY == 0) return
+		ctx.lineWidth = 5;
+		ctx.moveTo(x, y - 20);
+		ctx.lineTo(pX - 5, pY + 20); //parent node
+		ctx.stroke()
 }
 
 
-function draw_circle(x, y, value, pX, pY){
-	ctx.beginPath()
-	ctx.lineWidth = 5;
-	ctx.arc(x, y, 20, 0, 2 * Math.PI, true)
-	ctx.fillStyle = "white";
-	ctx.fill();
-	ctx.stroke()
-	//this is for the text inside the circle
-	ctx.beginPath()
-	ctx.font = "15px Arial"
-	ctx.fillStyle = "black";
-	ctx.fill();
-	ctx.textAlign = "center";
-	ctx.fillText(value, x, y + 5)
-	ctx.stroke();
+// function draw_circle(x, y, value, pX, pY){
+// 	if(!noDraw){
+// 		ctx.beginPath()
+// 		ctx.lineWidth = 5;
+// 		ctx.arc(x, y, 20, 0, 2 * Math.PI, true)
+// 		ctx.fillStyle = "white";
+// 		ctx.fill();
+// 		ctx.stroke()
+// 		//this is for the text inside the circle
+// 		ctx.beginPath()
+// 		ctx.font = "15px Arial"
+// 		ctx.fillStyle = "black";
+// 		ctx.fill();
+// 		ctx.textAlign = "center";
+// 		ctx.fillText(value, x, y + 5)
+// 		ctx.stroke();
 
-	if(pX == 0 && pY == 0) return
-	ctx.lineWidth = 5;
-	ctx.moveTo(x, y - 20);
-	ctx.lineTo(pX - 5, pY + 20); //parent node
-	ctx.stroke()
+// 		if(pX == 0 && pY == 0) return
+// 		ctx.lineWidth = 5;
+// 		ctx.moveTo(x, y - 20);
+// 		ctx.lineTo(pX - 5, pY + 20); //parent node
+// 		ctx.stroke()
+// 	}else{
+// 		noDraw = false
+// 	}
+// }
+
+function reloaction_draw(){
+
 }
