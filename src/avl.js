@@ -29,13 +29,15 @@ class BST{
 }
 
 class AVL{
-	insert(value, node, x, y, minWidth, maxWidth){
+	async insert(value, node, x, y, minWidth, maxWidth){
 		if(node == null){
+
 			return new BST(value, x, y, minWidth, maxWidth, 1)
 		}else if(value < node.value){
 			current_x = node.x;
 			current_y = node.y;
-			node.left = this.insert(value, node.left, 0, 0, 0, 0)
+			//draw(node.x, node.y, node.value, 0, 0);  color;
+			node.left = await this.insert(value, node.left, 0, 0, 0, 0)
 
 			//this is copied from my bst.js
 				if(flag){
@@ -47,6 +49,7 @@ class AVL{
 					parentY = current_y
 					current_x = node.left.x;
 					current_y = node.left.y;
+					draw(node.left.x, node.left.y, node.left.value, node.x, node.y, "white")
 					flag = false;
 				}
 		
@@ -54,7 +57,7 @@ class AVL{
 		}else if(value > node.value){
 			current_x = node.x
 			current_y = node.y;
-			node.right = this.insert(value, node.right, x, y, minWidth, maxWidth)
+			node.right = await this.insert(value, node.right, x, y, minWidth, maxWidth)
 
 			if(flag){
 				node.right.minWidth = node.x;
@@ -65,6 +68,7 @@ class AVL{
 				parentY = current_y
 				current_x = node.right.x
 				current_y = node.right.y
+				draw(node.right.x, node.right.y, node.right.value, node.x, node.y, "white")
 				flag = false
 			}
 
@@ -81,7 +85,7 @@ class AVL{
 			pMax = node.maxWidth;
 			pMin = node.minWidth;
 			
-			let v = this.rightBalance(node);
+			let v = await this.rightBalance(node);
 
 			v.x  = pX;
 			v.y = pY;
@@ -107,7 +111,7 @@ class AVL{
 			pMax = node.maxWidth;
 			pMin = node.minWidth;
 
-			let v = this.leftBalance(node);
+			let v = await this.leftBalance(node);
 			v.x = pX;
 			v.y = pY;
 			v.minWidth = pMin;
@@ -129,8 +133,8 @@ class AVL{
 			pY = node.y;
 			pMax = node.maxWidth;
 			pMin = node.minWidth;
-			node.left = this.leftBalance(node.left)
-			let v = this.rightBalance(node);
+			node.left = await this.leftBalance(node.left)
+			let v = await this.rightBalance(node);
 			v.x = pX;
 			v.y = pY;
 			v.minWidth = pMin;
@@ -150,8 +154,8 @@ class AVL{
 			pY = node.y;
 			pMax = node.maxWidth;
 			pMin = node.minWidth;
-			node.right = this.rightBalance(node.right)
-			let v = this.leftBalance(node);
+			node.right = await this.rightBalance(node.right)
+			let v = await this.leftBalance(node);
 			v.x = pX;
 			v.y = pY;
 			v.minWidth = pMin;
@@ -178,20 +182,22 @@ class AVL{
 
 	travel_preOrder_draw(node, pX, pY){
 		if(node == null) return ;
-		draw(node.x, node.y, node.value, pX, pY) //this is actual draw function.!
+		draw(node.x, node.y, node.value, pX, pY, "white") //this is actual draw function.!
 		this.travel_preOrder_draw(node.left, node.x, node.y);
 		this.travel_preOrder_draw(node.right, node.x, node.y)
 	}
 
-	rightBalance(n){
+	async rightBalance(n){
+		await draw_delay(n.x, n.y, n.value, "#f5f10a")
+		
 		let x = n.left;
 		let T2 = x.right;
-
+		
 		x.right = n;
 		n.left = T2;
 		n.height = 1 + Math.max(this.cal_hight(n.left), this.cal_hight(n.right))
 		x.height = 1 + Math.max(this.cal_hight(x.left), this.cal_hight(x.right))
-	
+		
 		return x;
 	}
 
@@ -205,7 +211,9 @@ class AVL{
 		return n.height;
 	}
 
-	leftBalance(n){
+	async leftBalance(n){
+		await draw_delay(n.x, n.y, n.value, "#f5f10a")
+
 		let x = n.right;
 		let T1  =x.left;
 		let temp_x = n.x;
@@ -264,25 +272,25 @@ class AVL{
 let tree = new AVL();
 let nodes =  null;
 
-function enterNumber() {
+async function enterNumber() {
 	let value = parseInt(document.getElementById("number").value);
 	if(nodes == null){
-		nodes = tree.insert(value, nodes, root_x, root_y, 0, canvas_width)
+		nodes = await tree.insert(value, nodes, root_x, root_y, 0, canvas_width)
 	}else{
-		nodes = tree.insert(value, nodes, current_x, current_y)
+		nodes = await tree.insert(value, nodes, current_x, current_y)
 		flag = true;
 	}
-	console.log(nodes)
 	ctx.clearRect(0, 0, canvas_width, canvas_height)
 	tree.travel_preOrder_draw(nodes, 0, 0)
+	document.getElementById("number").value = ""
 }
 
-function draw(x, y, value, pX, pY){
+function draw(x, y, value, pX, pY, color){
 		
 		ctx.beginPath()
 		ctx.lineWidth = 5;
 		ctx.arc(x, y, 20, 0, 2 * Math.PI, true)
-		ctx.fillStyle = "white";
+		ctx.fillStyle = color;
 		ctx.fill();
 		ctx.stroke()
 		//this is for the text inside the circle
@@ -299,4 +307,210 @@ function draw(x, y, value, pX, pY){
 		ctx.moveTo(x, y - 20);
 		ctx.lineTo(pX - 5, pY + 20); //parent node
 		ctx.stroke()
+}
+
+async function draw_delay(x, y, value, color){
+		
+		ctx.beginPath()
+		ctx.lineWidth = 5;
+		ctx.arc(x, y, 20, 0, 2 * Math.PI, true)
+		ctx.fillStyle = color;
+		ctx.fill();
+		ctx.stroke()
+		//this is for the text inside the circle
+		ctx.beginPath()
+		ctx.font = "15px Arial"
+		ctx.fillStyle = "black";
+		ctx.fill();
+		ctx.textAlign = "center";
+		ctx.fillText(value, x, y + 5)
+		ctx.stroke();
+		await sleep1(1000)
+}
+
+let firstNodeVisual = true;
+//reset
+
+function resetAll(){
+	node = new BST();
+	ctx.clearRect(0, 0 ,canvas_width, canvas_height)
+	document.getElementById("number").value = ""
+	document.getElementById("comp").innerHTML = "You can see the current status of the Binary Search here.!"
+}
+
+//search element
+async function findEle(){
+	reset_Tree_Visual(reset_nodes)
+	let value = (document.getElementById("number").value)
+	if(!value == ""){
+		if(await contains(nodes, parseInt(value))){alert("Found")} else{
+		alert("Not found!")
+		}
+	}else{
+		alert("Cannot search for the blank value!")
+	}
+	firstNodeVisual = true;
+	document.getElementById("number").value = ""
+}
+
+
+function sleep(ms){
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+
+function sleep1(ms){
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+
+function reset_Tree_Visual(reset_nodes){
+	if(reset_nodes.length > 0){
+		for(let i = 0; i < reset_nodes.length; ++i){
+			ctx.beginPath()
+			ctx.lineWidth = 5;
+			ctx.arc(reset_nodes[i][0], reset_nodes[i][1], 20, 0, 2 * Math.PI, true)
+			ctx.fillStyle = "white";
+			ctx.fill();
+			ctx.stroke()
+
+			//this if for the text
+
+			ctx.beginPath()
+			ctx.font = "15px Arial"
+			ctx.fillStyle = "black";
+			ctx.fill();
+			ctx.textAlign = "center";
+			ctx.fillText(reset_nodes[i][2], reset_nodes[i][0], reset_nodes[i][1] + 5)
+			ctx.stroke();
+		}
+		reset_nodes = [];
+	}
+}
+
+
+
+async function contains(demo, value) {
+    // Write your code here.
+    document.getElementById("comp").innerHTML = "Comparing the value: - " + value + " and " + demo.value
+    if(firstNodeVisual){
+    	firstNodeVisual = false;
+    	ctx.beginPath()
+		ctx.lineWidth = 5;
+		ctx.arc(demo.x, demo.y, 20, 0, 2 * Math.PI, true)
+		ctx.fillStyle = "red";
+		ctx.fill();
+		ctx.stroke()
+
+		//this if for the text
+		ctx.beginPath()
+		ctx.font = "15px Arial"
+		ctx.fillStyle = "white";
+		ctx.fill();
+		ctx.textAlign = "center";
+		ctx.fillText(demo.value, demo.x, demo.y + 5)
+		ctx.stroke();
+		reset_nodes.push([demo.x, demo.y, demo.value])
+    }
+    await sleep(1500)
+		if(value < demo.value){
+			if(demo.left == null){
+				ctx.beginPath()
+				ctx.lineWidth = 5;
+				ctx.arc(demo.x, demo.y, 20, 0, 2 * Math.PI, true)
+				ctx.fillStyle = "red";
+				ctx.fill();
+				ctx.stroke()
+
+				//this if for the text
+
+				ctx.beginPath()
+				ctx.font = "15px Arial"
+				ctx.fillStyle = "white";
+				ctx.fill();
+				ctx.textAlign = "center";
+				ctx.fillText(demo.value, demo.x, demo.y + 5)
+				ctx.stroke();
+				reset_nodes.push([demo.x, demo.y, demo.value])
+				document.getElementById("comp").innerHTML = value + " is not found in this tree.!"
+				return false
+			}else{
+				ctx.beginPath()
+				ctx.lineWidth = 5;
+				ctx.arc(demo.left.x, demo.left.y, 20, 0, 2 * Math.PI, true)
+				ctx.fillStyle = "red";
+				ctx.fill();
+				ctx.stroke()
+
+				//this if for the text
+
+				ctx.beginPath()
+				ctx.font = "15px Arial"
+				ctx.fillStyle = "white";
+				ctx.fill();
+				ctx.textAlign = "center";
+				ctx.fillText(demo.left.value, demo.left.x, demo.left.y + 5)
+				ctx.stroke();
+				reset_nodes.push([demo.left.x, demo.left.y, demo.left.value])
+				return await contains(demo.left, value)
+			}
+		}else if (value > demo.value){
+			if (demo.right == null){
+				ctx.beginPath()
+				ctx.lineWidth = 5;
+				ctx.arc(demo.x, demo.y, 20, 0, 2 * Math.PI, true)
+				ctx.fillStyle = "red";
+				ctx.fill();
+				ctx.stroke()
+
+				//this if for the text
+
+				ctx.beginPath()
+				ctx.font = "15px Arial"
+				ctx.fillStyle = "white";
+				ctx.fill();
+				ctx.textAlign = "center";
+				ctx.fillText(demo.value, demo.x, demo.y + 5)
+				ctx.stroke();
+				reset_nodes.push([demo.x, demo.y, demo.value])
+				document.getElementById("comp").innerHTML = value + " is not found in this tree.!"
+				return false
+			}else{
+				ctx.beginPath()
+				ctx.lineWidth = 5;
+				ctx.arc(demo.right.x, demo.right.y, 20, 0, 2 * Math.PI, true)
+				ctx.fillStyle = "red";
+				ctx.fill();
+				ctx.stroke()
+
+				//this if for the text
+
+				ctx.beginPath()
+				ctx.font = "15px Arial"
+				ctx.fillStyle = "white";
+				ctx.fill();
+				ctx.textAlign = "center";
+				ctx.fillText(demo.right.value, demo.right.x, demo.right.y + 5)
+				ctx.stroke();
+				reset_nodes.push([demo.right.x, demo.right.y, demo.right.value])
+				return await contains(demo.right, value)
+			}
+		}else{
+			ctx.lineWidth = 5;
+			ctx.arc(demo.x, demo.y, 20, 0, 2 * Math.PI, true)
+			ctx.fillStyle = "green";
+			ctx.fill();
+			ctx.stroke()
+
+			//this is for the text
+			ctx.beginPath()
+			ctx.font = "15px Arial"
+			ctx.fillStyle = "white";
+			ctx.fill();
+			ctx.textAlign = "center";
+			ctx.fillText(demo.value, demo.x, demo.y + 5)
+			ctx.stroke();
+			document.getElementById("comp").innerHTML = value + " is found in this tree.!"
+			return true
+		}
 }
