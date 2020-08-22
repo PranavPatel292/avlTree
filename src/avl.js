@@ -282,6 +282,7 @@ async function enterNumber() {
 	}
 	ctx.clearRect(0, 0, canvas_width, canvas_height)
 	tree.travel_preOrder_draw(nodes, 0, 0)
+	document.getElementById("comp").innerHTML = "You can see the current status of the Binary Search here.!"
 	document.getElementById("number").value = ""
 }
 
@@ -325,7 +326,7 @@ async function draw_delay(x, y, value, color){
 		ctx.textAlign = "center";
 		ctx.fillText(value, x, y + 5)
 		ctx.stroke();
-		await sleep1(1000)
+		await sleep1(1500)
 }
 
 let firstNodeVisual = true;
@@ -336,6 +337,7 @@ function resetAll(){
 	ctx.clearRect(0, 0 ,canvas_width, canvas_height)
 	document.getElementById("number").value = ""
 	document.getElementById("comp").innerHTML = "You can see the current status of the Binary Search here.!"
+	document.getElementById("operation").innerHTML = "You can see what rotation the AVL tree has perform here.!"
 }
 
 //search element
@@ -351,6 +353,7 @@ async function findEle(){
 	}
 	firstNodeVisual = true;
 	document.getElementById("number").value = ""
+	document.getElementById("operation").innerHTML = "Searching Complete!, You can now see what rotation the AVL tree has perform here.!"
 }
 
 
@@ -393,6 +396,7 @@ function reset_Tree_Visual(reset_nodes){
 async function contains(demo, value) {
     // Write your code here.
     document.getElementById("comp").innerHTML = "Comparing the value: - " + value + " and " + demo.value
+    document.getElementById("operation").innerHTML = "Searching in progress!"
     if(firstNodeVisual){
     	firstNodeVisual = false;
     	ctx.beginPath()
