@@ -333,7 +333,8 @@ let firstNodeVisual = true;
 //reset
 
 function resetAll(){
-	node = new BST();
+	tree = new AVL();
+	nodes =  null;
 	ctx.clearRect(0, 0 ,canvas_width, canvas_height)
 	document.getElementById("number").value = ""
 	document.getElementById("comp").innerHTML = "You can see the current status of the Binary Search here.!"
